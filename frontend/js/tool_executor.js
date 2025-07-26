@@ -105,6 +105,19 @@ async function executeTool(toolCall, rootDirectoryHandle) {
             });
             return { message: `Folder '${parameters.folder_path}' created successfully.` };
         }
+        case 'duckduckgo_search': {
+            const response = await fetch('/api/duckduckgo-search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: parameters.query }),
+            });
+            const searchResult = await response.json();
+            if (response.ok) {
+                return searchResult;
+            } else {
+                throw new Error(searchResult.message || 'Failed to perform search');
+            }
+        }
         case 'search_code': {
             const searchResults = [];
             await FileSystem.searchInDirectory(rootDirectoryHandle, parameters.search_term, '', searchResults);

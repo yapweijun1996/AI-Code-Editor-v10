@@ -46,6 +46,7 @@ export const GeminiChat = {
                     { name: 'get_selected_text', description: 'Gets the text currently selected by the user in the editor.' },
                     { name: 'replace_selected_text', description: 'Replaces the currently selected text in the editor with new text.', parameters: { type: 'OBJECT', properties: { new_text: { type: 'STRING' } }, required: ['new_text'] } },
                     { name: 'get_project_structure', description: 'Gets the entire file and folder structure of the project. CRITICAL: Always use this tool before attempting to read or create a file to ensure you have the correct file path.' },
+                    { name: 'duckduckgo_search', description: 'Performs a search using DuckDuckGo and returns the results.', parameters: { type: 'OBJECT', properties: { query: { type: 'STRING' } }, required: ['query'] } },
                     { name: 'search_code', description: 'Searches for a specific string in all files in the project (like grep).', parameters: { type: 'OBJECT', properties: { search_term: { type: 'STRING' } }, required: ['search_term'] } },
                     { name: 'run_terminal_command', description: 'Executes a shell command on the backend and returns the output.', parameters: { type: 'OBJECT', properties: { command: { type: 'STRING' } }, required: ['command'] } },
                     { name: 'build_or_update_codebase_index', description: 'Scans the entire codebase to build a searchable index. Slow, run once per session.' },
@@ -88,6 +89,7 @@ export const GeminiChat = {
 **4. URL HANDLING & RESEARCH:**
 - **URL Construction Rule:** When you discover relative URLs (e.g., '/path/to/page'), you MUST convert them to absolute URLs by correctly combining them with the base URL of the source page. CRITICAL: Ensure you do not introduce errors like double slashes ('//') or invalid characters ('.com./').
 - **Autonomous Deep Dive:** When you read a URL and it contains more links, you must autonomously select the single most relevant link to continue the research. State your choice and proceed when commanded. Do not ask the user which link to choose.
+- **Proactive URL Reading from Search:** After performing a \`duckduckgo_search\`, you MUST analyze the search results. If the titles and snippets suggest a result is highly relevant to the user's query, you MUST proactively use the \`read_url\` tool on that URL to get more details. You do not need to ask the user for permission to do this.
 
 **5. CONTENT AGGREGATION WORKFLOW:**
 - When a user asks you to read a URL and generate content based on it (e.g., "read the news and create a summary page"), you MUST follow this specific multi-step process:

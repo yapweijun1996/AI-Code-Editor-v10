@@ -64,6 +64,56 @@ app.post('/api/read-url', async (req, res) => {
   }
 });
 
+// =================================================================
+// === DuckDuckGo Search Endpoint                                  ===
+// =================================================================
+app.post('/api/duckduckgo-search', async (req, res) => {
+  const { query } = req.body;
+
+  if (!query) {
+    return res.status(400).json({ error: 'Query is required' });
+  }
+
+  try {
+    const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+    const response = await axios.get(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      },
+    });
+
+    const $ = cheerio.load(response.data);
+    const results = [];
+    $('.result').each((i, element) => {
+      const titleElem = $(element).find('.result__title a');
+      const snippetElem = $(element).find('.result__snippet');
+      const link = titleElem.attr('href');
+      
+      // Clean up DuckDuckGo redirect URLs
+      let cleanedLink = null;
+      if (link) {
+          const url = new URL(link, "https://duckduckgo.com");
+          cleanedLink = url.searchParams.get("uddg");
+      }
+
+      if (titleElem.length > 0 && snippetElem.length > 0 && cleanedLink) {
+        results.push({
+          title: titleElem.text(),
+          link: cleanedLink,
+          snippet: snippetElem.text(),
+        });
+      }
+    });
+
+    res.json({ results });
+  } catch (error) {
+    console.error(`[BACKEND] Error searching DuckDuckGo for "${query}":`, error.message);
+    res.status(500).json({
+      status: 'Error',
+      message: `Failed to perform the search: ${error.message}`,
+    });
+  }
+});
 
 // =================================================================
 // === Backend Terminal Tool Execution Endpoint                  ===
